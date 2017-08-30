@@ -1,0 +1,18 @@
+variable "access_key" {
+	default = "YOUR_ACCESS_KEY"
+}
+variable "secret_key" {
+	default = "YOUR_SECRET_KEY"
+}
+variable "region" {
+    default = "us-west-1"
+}
+variable "ami_version" {
+    default = "ami-09d2fb69"
+}
+variable "aws_instance_type" {
+    default = "t2.micro"
+}
+variable "instance_name" {
+    default = "ec2-terraform"
+}
