@@ -32,10 +32,10 @@ resource "aws_instance" "master" {
       "sudo curl -o /usr/local/bin/docker-compose -L https://github.com/docker/compose/releases/download/1.12.0/docker-compose-$(uname -s)-$(uname -m)",
       "sudo chmod +x /usr/local/bin/docker-compose",
       "sudo usermod -aG docker $USER",
-      "cd /${var.path_project} && wget https://github.com/robsonscruz/api-test/archive/v1.0.zip",
-      "cd /${var.path_project} && unzip v1.0.zip",
+      "cd /${var.path_project} && wget https://github.com/robsonscruz/api-test/archive/v1.1.zip",
+      "cd /${var.path_project} && unzip v1.1.zip",
       "cd /${var.path_project}/env-docker/www && rm -rf api-test",
-      "cd /${var.path_project} && mv api-test-1.0 /${var.path_project}/env-docker/www/api-test && rm v1.0.zip",
+      "cd /${var.path_project} && mv api-test-1.0 /${var.path_project}/env-docker/www/api-test && rm v1.1.zip",
       "sudo chmod 777 -Rf /${var.path_project}/env-docker/www/api-test/var",
       "cd /${var.path_project}/env-docker && sudo docker-compose build && sudo docker-compose up -d"
     ]
