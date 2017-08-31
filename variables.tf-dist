@@ -16,3 +16,6 @@ variable "aws_instance_type" {
 variable "instance_name" {
     default = "ec2-terraform"
 }
+variable "path_project" {
+    default = "/datacenter"
+}

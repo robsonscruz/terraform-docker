@@ -22,12 +22,22 @@ resource "aws_instance" "master" {
       "sudo apt-add-repository 'deb https://apt.dockerproject.org/repo ubuntu-xenial main'",
       "sudo apt-get update",
       "sudo apt-cache policy docker-engine",
-      "sudo apt-get install -y docker-engine",
+      "sudo apt-get install -y docker-engine wget unzip htop",
       "sudo docker swarm init",
       "sudo docker swarm join-token --quiet worker > /home/ubuntu/token",
-      "sudo mkdir -p /projetos && sudo chown -Rf root:ubuntu /projetos && sudo chmod 775 -Rf /projetos",
-      "cd /projetos && git clone git@github.com:robsonscruz/docker-web-example.git env-docker",
-      "sudo chown -Rf root:ubuntu /projetos && sudo chmod 775 -Rf /projetos"
+      "sudo mkdir -p /${var.path_project} && sudo chown -Rf root:ubuntu /${var.path_project} && sudo chmod 775 -Rf /${var.path_project}",
+      "cd /${var.path_project} && wget https://github.com/robsonscruz/docker-web-example/archive/master.zip",
+      "cd /${var.path_project} && unzip master.zip && mv docker-web-example-master env-docker && rm master.zip",
+      "cd /${var.path_project}/env-docker && mv volumes.yml.dist volumes.yml",
+      "sudo curl -o /usr/local/bin/docker-compose -L https://github.com/docker/compose/releases/download/1.12.0/docker-compose-$(uname -s)-$(uname -m)",
+      "sudo chmod +x /usr/local/bin/docker-compose",
+      "sudo usermod -aG docker $USER",
+      "cd /${var.path_project} && wget https://github.com/robsonscruz/api-test/archive/v1.0.zip",
+      "cd /${var.path_project} && unzip v1.0.zip",
+      "cd /${var.path_project}/env-docker/www && rm -rf api-test",
+      "cd /${var.path_project} && mv api-test-1.0 /${var.path_project}/env-docker/www/api-test && rm v1.0.zip",
+      "sudo chmod 777 -Rf /${var.path_project}/env-docker/www/api-test/var",
+      "cd /${var.path_project}/env-docker && sudo docker-compose build && sudo docker-compose up -d"
     ]
   }
   provisioner "file" {
