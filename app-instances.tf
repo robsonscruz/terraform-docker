@@ -37,7 +37,7 @@ resource "aws_instance" "master" {
       "cd /${var.path_project}/env-docker/www && rm -rf api-test",
       "cd /${var.path_project} && mv api-test-1.1 /${var.path_project}/env-docker/www/api-test && rm v1.1.zip",
       "sudo chmod 777 -Rf /${var.path_project}/env-docker/www/api-test/var",
-      "cd /${var.path_project}/env-docker && sudo docker-compose build && sudo docker-compose up -d"
+      "cd /${var.path_project}/env-docker && sudo docker-compose build && sudo docker-compose up -d && sudo docker-compose up -d --force-recreate"
     ]
   }
   provisioner "file" {
