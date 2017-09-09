@@ -59,6 +59,10 @@ resource "aws_instance" "slave" {
     user = "ubuntu"
     private_key = "${file("~/.ssh/longevo-tech.pem")}"
   }
+  provisioner "file" {
+    source = "~/.ssh/longevo-tech.pem"
+    destination = "/home/ubuntu/key.pem"
+  }
   provisioner "remote-exec" {
     inline = [
       "sudo apt-get update",
@@ -69,8 +73,8 @@ resource "aws_instance" "slave" {
       "sudo apt-get update",
       "sudo apt-cache policy docker-engine",
       "sudo apt-get install -y docker-engine",
-      "sudo chmod 400 /home/ubuntu/test.pem",
-      "sudo scp -o StrictHostKeyChecking=no -o NoHostAuthenticationForLocalhost=yes -o UserKnownHostsFile=/dev/null -i test.pem ubuntu@${aws_instance.master.private_ip}:/home/ubuntu/token .",
+      "sudo chmod 400 /home/ubuntu/key.pem",
+      "sudo scp -o StrictHostKeyChecking=no -o NoHostAuthenticationForLocalhost=yes -o UserKnownHostsFile=/dev/null -i key.pem ubuntu@${aws_instance.master.private_ip}:/home/ubuntu/token .",
       "sudo docker swarm join --token $(cat /home/ubuntu/token) ${aws_instance.master.private_ip}:2377"
     ]
   }
