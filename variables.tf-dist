@@ -16,6 +16,9 @@ variable "aws_instance_type" {
 variable "instance_name" {
     default = "ec2-terraform"
 }
+variable "aws_volume_size" {
+    default = "30"
+}
 variable "path_project" {
     default = "/datacenter"
 }
