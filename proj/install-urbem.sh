@@ -3,9 +3,10 @@
 ROOT_PATH_PROJECT="/datacenter"
 # ROOT_PATH_PROJECT="/home/rcruz/Projetos"
 URL_ENV_URBEM_DOCKER="https://github.com/robsonscruz/env-urbem/archive/master.zip"
-VERSION_URBEM="201711151345"
+VERSION_URBEM="201711151640"
 URL_PROJECT_URBEM="https://github.com/tilongevo/urbem3.0/archive/v${VERSION_URBEM}.zip"
 URL_PROJECT_TRANSPARENCIA="https://github.com/tilongevo/urbem-transparencia/archive/v1.2.1.zip"
+URL_PROJECT_REDE_SIMPLES="https://github.com/tilongevo/rede-simples/archive/v201711151700.zip"
 URL_BANCO_DADOS="https://github.com/tilongevo/banco-zerado-urbem3.0/archive/master.zip"
 
 installDocker() {
@@ -63,6 +64,16 @@ downloadPortalDaTransparencia() {
     chmod 777 -Rf /${ROOT_PATH_PROJECT}/env-urbem/www/transparencia-prod/tmp
 }
 
+downloadRedeSimples() {
+    echo "Executando download do Rede Simples"
+    cd /${ROOT_PATH_PROJECT} && wget ${URL_PROJECT_REDE_SIMPLES} && \
+    cd /${ROOT_PATH_PROJECT} && unzip v201711151700.zip && \
+    cd /${ROOT_PATH_PROJECT}/env-urbem/www && rm -rf redesimples-prod && \
+    cd /${ROOT_PATH_PROJECT} && mv rede-simples-201711151700 /${ROOT_PATH_PROJECT}/env-urbem/www/redesimples-prod && rm v201711151700.zip && \
+    chmod 777 -Rf /${ROOT_PATH_PROJECT}/env-urbem/www/redesimples-prod/web/datafiles
+    chmod 777 -Rf /${ROOT_PATH_PROJECT}/env-urbem/www/redesimples-prod/database
+}
+
 downloadDatabases() {
     echo "Executando download dos bancos necessarios para criacao de todo parque Longevo/Urbem"
     cd /${ROOT_PATH_PROJECT} && wget ${URL_BANCO_DADOS} && \
@@ -110,10 +121,13 @@ downloadEnvUrbem
 # DEV
 downloadUrbem
 downloadPortalDaTransparencia
+downloadRedeSimples
 downloadDatabases
 createPathTempUrbem
 reinitializeDocker
 initializeUrbem
 reinitializeDocker
+
+#PROD
 permissionUserLoggedDocker
 permissionPathStorage
