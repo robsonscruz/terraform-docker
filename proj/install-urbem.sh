@@ -1,12 +1,12 @@
 #!/bin/bash
 
 ROOT_PATH_PROJECT="/datacenter"
-# ROOT_PATH_PROJECT="/home/rcruz/Projetos"
+#ROOT_PATH_PROJECT="/home/rcruz/Projetos"
 URL_ENV_URBEM_DOCKER="https://github.com/robsonscruz/env-urbem/archive/master.zip"
 VERSION_URBEM="201711151640"
 URL_PROJECT_URBEM="https://github.com/tilongevo/urbem3.0/archive/v${VERSION_URBEM}.zip"
 URL_PROJECT_TRANSPARENCIA="https://github.com/tilongevo/urbem-transparencia/archive/v1.2.1.zip"
-URL_PROJECT_REDE_SIMPLES="https://github.com/tilongevo/rede-simples/archive/v201711151700.zip"
+URL_PROJECT_REDE_SIMPLES="https://github.com/tilongevo/rede-simples/archive/v201711211030.zip"
 URL_BANCO_DADOS="https://github.com/tilongevo/banco-zerado-urbem3.0/archive/master.zip"
 
 installDocker() {
@@ -67,18 +67,20 @@ downloadPortalDaTransparencia() {
 downloadRedeSimples() {
     echo "Executando download do Rede Simples"
     cd /${ROOT_PATH_PROJECT} && wget ${URL_PROJECT_REDE_SIMPLES}
-    cd /${ROOT_PATH_PROJECT} && unzip v201711151700.zip
+    cd /${ROOT_PATH_PROJECT} && unzip v201711211030.zip
     cd /${ROOT_PATH_PROJECT}/env-urbem/www && rm -rf redesimples-prod
-    cd /${ROOT_PATH_PROJECT} && mv rede-simples-201711151700 /${ROOT_PATH_PROJECT}/env-urbem/www/redesimples-prod && rm v201711151700.zip
+    cd /${ROOT_PATH_PROJECT} && mv rede-simples-201711211030 /${ROOT_PATH_PROJECT}/env-urbem/www/redesimples-prod && rm v201711211030.zip
     chmod 777 -Rf /${ROOT_PATH_PROJECT}/env-urbem/www/redesimples-prod/web/datafiles
     chmod 777 -Rf /${ROOT_PATH_PROJECT}/env-urbem/www/redesimples-prod/database
 }
 
 downloadDatabases() {
     echo "Executando download dos bancos necessarios para criacao de todo parque Longevo/Urbem"
+    cd /${ROOT_PATH_PROJECT}/env-urbem/www/urbem-prod && sudo rm -rf banco-zerado-urbem3.0
     cd /${ROOT_PATH_PROJECT} && wget ${URL_BANCO_DADOS}
     cd /${ROOT_PATH_PROJECT} && unzip master.zip
-    cd /${ROOT_PATH_PROJECT} && mv banco-zerado-urbem3.0-master /${ROOT_PATH_PROJECT}/env-urbem/www/urbem-prod/banco-zerado-urbem3.0 && rm banco-zerado-urbem3.0-master.zip
+    cd /${ROOT_PATH_PROJECT} && mv banco-zerado-urbem3.0-master /${ROOT_PATH_PROJECT}/env-urbem/www/urbem-prod/banco-zerado-urbem3.0 && rm master.zip
+    cd /${ROOT_PATH_PROJECT}/env-urbem/www/urbem-prod/banco-zerado-urbem3.0 && tar -xzvf rede-simples.sql.tar.gz && tar -xzvf transparencia-zerado.sql.tar.gz && tar -xzvf urbem-zerado.tar.gz
 }
 
 createPathTempUrbem() {
@@ -107,10 +109,25 @@ initializeUrbem() {
 }
 
 permissionPathStorage() {
-    sudo chmod 777 -Rf /datacenter/env-urbem/www/urbem-prod/var
-    sudo chmod 777 -Rf /datacenter/env-urbem/www/urbem-prod/var/*
-    sudo chmod 777 -Rf /datacenter/env-urbem/www/storage
-    sudo chmod 777 -Rf /datacenter/env-urbem/www/storage/*
+    sudo chmod 777 -Rf /${ROOT_PATH_PROJECT}/env-urbem/www/urbem-prod/var
+    sudo chmod 777 -Rf /${ROOT_PATH_PROJECT}/env-urbem/www/urbem-prod/var/*
+    sudo chmod 777 -Rf /${ROOT_PATH_PROJECT}/env-urbem/www/storage
+    sudo chmod 777 -Rf /${ROOT_PATH_PROJECT}/env-urbem/www/storage/*
+}
+
+importDBUrbem() {
+    sudo docker exec envurbem_web-redesimples_1 /sbin/importTransparencia.sh
+    sudo docker exec envurbem_web-redesimples_1 /sbin/importUrbem.sh
+    sudo docker exec envurbem_web-redesimples_1 /sbin/importETL.sh
+}
+
+importDBRedeSimples() {
+    echo "Importando banco de dados Rede Simples"
+    sudo docker exec envurbem_web-redesimples_1 /sbin/importRedeSimples.sh
+}
+
+updateDatabaseUrbem() {
+    sudo docker exec envurbem_web-urbem_1 php /srv/www/urbem/bin/console doc:mi:mi --env=prod --no-interaction
 }
 
 #PROD
@@ -128,7 +145,14 @@ createPathTempUrbem
 reinitializeDocker
 initializeUrbem
 
+importDBRedeSimples
+importDBUrbem
+
 #PROD
 permissionPathStorage
-
+updateDatabaseUrbem
 reinitializeDocker
+
+#drop database urbem; create database urbem; GRANT all ON DATABASE urbem TO docker;
+#drop database etl; create database etl; GRANT all ON DATABASE etl TO docker;
+#drop database "urbem-transparencia"; create database "urbem-transparencia"; GRANT all ON DATABASE "urbem-transparencia" TO docker;
